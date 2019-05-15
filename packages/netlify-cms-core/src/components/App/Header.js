@@ -109,6 +109,11 @@ const AppHeaderNavList = styled.ul`
   list-style: none;
 `;
 
+const inList = (list, item) => {
+  return list.includes(item);
+}
+
+
 class Header extends React.Component {
   static propTypes = {
     user: ImmutablePropTypes.map.isRequired,
@@ -119,6 +124,7 @@ class Header extends React.Component {
     hasWorkflow: PropTypes.bool.isRequired,
     displayUrl: PropTypes.string,
     t: PropTypes.func.isRequired,
+    navOptions: ImmutablePropTypes.map
   };
 
   handleCreatePostClick = collectionName => {
@@ -138,6 +144,7 @@ class Header extends React.Component {
       displayUrl,
       t,
       showMediaButton,
+      navOptions,
     } = this.props;
 
     const createableCollections = collections
@@ -159,7 +166,7 @@ class Header extends React.Component {
                   {t('app.header.content')}
                 </AppHeaderNavLink>
               </li>
-              {hasWorkflow && (
+              {hasWorkflow && !inList(navOptions.get('hide'), 'workflow') && (
                 <li>
                   <AppHeaderNavLink to="/workflow" activeClassName="header-link-active">
                     <Icon type="workflow" />
@@ -167,7 +174,7 @@ class Header extends React.Component {
                   </AppHeaderNavLink>
                 </li>
               )}
-              {showMediaButton && (
+              {showMediaButton && !inList(navOptions.get('hide'), 'media') && (
                 <li>
                   <AppHeaderButton onClick={openMediaLibrary}>
                     <Icon type="media-alt" />
@@ -175,6 +182,13 @@ class Header extends React.Component {
                   </AppHeaderButton>
                 </li>
               )}
+              {navOptions.get('add').toJS().map((item, i) => {
+                return (
+                  <li key={item.text + i}>
+                    <a href={item.href} target={item.target}>{item.text}</a>
+                  </li>
+                )
+              })}
             </AppHeaderNavList>
           </nav>
           <AppHeaderActions>
