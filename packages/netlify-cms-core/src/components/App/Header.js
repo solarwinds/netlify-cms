@@ -151,6 +151,11 @@ class Header extends React.Component {
       .filter(collection => collection.get('create'))
       .toList();
 
+    const navOpts = {
+      hide: navOptions ? navOptions.get('hide').toJS() : [],
+      add: navOptions ? navOptions.get('add').toJS() : []
+    }
+
     return (
       <AppHeader>
         <AppHeaderContent>
@@ -166,7 +171,7 @@ class Header extends React.Component {
                   {t('app.header.content')}
                 </AppHeaderNavLink>
               </li>
-              {hasWorkflow && !inList(navOptions.get('hide'), 'workflow') && (
+              {hasWorkflow && !inList(navOpts.hide, 'workflow') && (
                 <li>
                   <AppHeaderNavLink to="/workflow" activeClassName="header-link-active">
                     <Icon type="workflow" />
@@ -174,7 +179,7 @@ class Header extends React.Component {
                   </AppHeaderNavLink>
                 </li>
               )}
-              {showMediaButton && !inList(navOptions.get('hide'), 'media') && (
+              {showMediaButton && !inList(navOptions.hide, 'media') && (
                 <li>
                   <AppHeaderButton onClick={openMediaLibrary}>
                     <Icon type="media-alt" />
@@ -182,7 +187,7 @@ class Header extends React.Component {
                   </AppHeaderButton>
                 </li>
               )}
-              {navOptions.get('add') && navOptions.get('add').toJS().map((item, i) => {
+              {navOptions.add.map((item, i) => {
                 return (
                   <li key={item.text + i}>
                     <a href={item.href} target={item.target}>{item.text}</a>
