@@ -65,7 +65,6 @@ class App extends React.Component {
     openMediaLibrary: PropTypes.func.isRequired,
     showMediaButton: PropTypes.bool,
     t: PropTypes.func.isRequired,
-    navOptions: ImmutablePropTypes.map,
   };
 
   configError(config) {
@@ -138,7 +137,6 @@ class App extends React.Component {
       openMediaLibrary,
       t,
       showMediaButton,
-      navOptions,
     } = this.props;
 
     if (config === null) {
@@ -172,7 +170,6 @@ class App extends React.Component {
           hasWorkflow={hasWorkflow}
           displayUrl={config.get('display_url')}
           showMediaButton={showMediaButton}
-          navOptions={navOptions}
         />
         <AppMainContainer>
           {isFetching && <TopBarProgress />}
@@ -212,7 +209,6 @@ function mapStateToProps(state) {
   const isFetching = globalUI.get('isFetching');
   const publishMode = config && config.get('publish_mode');
   const useMediaLibrary = !mediaLibrary.get('externalLibrary');
-  const navOptions = config && config.get('nav_options');
   const showMediaButton = mediaLibrary.get('showMediaButton');
   return {
     auth,
@@ -223,7 +219,6 @@ function mapStateToProps(state) {
     publishMode,
     showMediaButton,
     useMediaLibrary,
-    navOptions,
   };
 }
 
