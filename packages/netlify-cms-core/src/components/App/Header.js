@@ -182,7 +182,7 @@ class Header extends React.Component {
                   </AppHeaderButton>
                 </li>
               )}
-              {navOptions.get('add').toJS().map((item, i) => {
+              {navOptions.get('add') && navOptions.get('add').toJS().map((item, i) => {
                 return (
                   <li key={item.text + i}>
                     <a href={item.href} target={item.target}>{item.text}</a>
