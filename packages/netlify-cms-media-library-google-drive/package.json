@@ -1,0 +1,26 @@
+{
+  "name": "netlify-cms-media-library-google-drive",
+  "description": "Google Drive integration for Netlify CMS",
+  "version": "0.1.0",
+  "repository": "https://github.com/netlify/netlify-cms/tree/master/packages/netlify-cms-media-library-google-drive",
+  "bugs": "https://github.com/netlify/netlify-cms/issues",
+  "module": "dist/esm/index.js",
+  "main": "dist/netlify-cms-media-library-google-drive.js",
+  "license": "MIT",
+  "keywords": [
+    "netlify",
+    "netlify-cms",
+    "google drive",
+    "media",
+    "assets",
+    "files",
+    "uploads"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "develop": "yarn build:esm --watch",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:esm": "cross-env NODE_ENV=esm babel src --out-dir dist/esm --ignore **/__tests__ --root-mode upward"
+  },
+  "dependencies": {}
+}
