@@ -4,6 +4,7 @@
  */
 import { once } from 'lodash';
 import { getMediaLibrary } from 'Lib/registry';
+import { getCurrentEntry, getCurrentRoute } from 'Lib/store';
 import store from 'ReduxStore';
 import { createMediaLibrary, insertMedia } from 'Actions/mediaLibrary';
 
@@ -18,7 +19,14 @@ store.subscribe(() => {
   const state = store.getState();
   const mediaLibraryName = state.config.getIn(['media_library', 'name']);
   if (mediaLibraryName && !state.mediaLibrary.get('externalLibrary')) {
-    const mediaLibraryConfig = state.config.get('media_library').toJS();
+    const mediaLibraryConfig = {
+      ...state.config.get('media_library').toJS(),
+      routing: {
+        collectionSlugs: state.config.get('collections').toJS().map(coll => { return { name: coll.name, slug: coll.slug }}),
+        getCurrentRoute: getCurrentRoute(store),
+        getCurrentEntry: getCurrentEntry(store)
+      }
+    };
     initializeMediaLibrary(mediaLibraryName, mediaLibraryConfig);
   }
 });
