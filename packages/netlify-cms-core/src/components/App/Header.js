@@ -167,14 +167,14 @@ class Header extends React.Component {
                   </AppHeaderNavLink>
                 </li>
               )}
-              {showMediaButton && (
+              {/*showMediaButton && (
                 <li>
                   <AppHeaderButton onClick={openMediaLibrary}>
                     <Icon type="media-alt" />
                     {t('app.header.media')}
                   </AppHeaderButton>
                 </li>
-              )}
+              )*/}
             </AppHeaderNavList>
           </nav>
           <AppHeaderActions>
