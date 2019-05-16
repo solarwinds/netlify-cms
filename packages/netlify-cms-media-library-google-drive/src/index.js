@@ -1,6 +1,6 @@
 import { loadScript } from 'netlify-cms-lib-util';
 
-const scriptSrc = 'https://apis.google.com/js/api.js?onload=onApiLoad';
+const gapiScript = 'https://apis.google.com/js/api.js?onload=onApiLoad';
 
 const defaultConfig = {
   browse_view: true,
@@ -8,6 +8,31 @@ const defaultConfig = {
   scope: 'https://www.googleapis.com/auth/drive',
   picker_title: 'Media'
 };
+
+function isValidConfig(config) {
+  let incompleteConfig = false;
+  if (!config.api_key) {
+    console.error('[Error] Google Drive Media Library: No API key set in config.');
+    incompleteConfig = true;
+  }
+  if (!config.app_id) {
+    console.error('[Error] Google Drive Media Library: No app id set in config.');
+    incompleteConfig = true;
+  }
+  if (!config.origin) {
+    console.error('[Error] Google Drive Media Library: No origin URL set in config.');
+    incompleteConfig = true;
+  }
+  if (!config.auth_url && !config.client_id) {
+    console.error('[Error] Google Drive Media Library: You must set either a client ID or an auth URL in config.');
+    incompleteConfig = true;
+  }
+  if (!config.post_upload_url) {
+    console.error('[Error] Google Drive Media Library: No post-upload Apps Script URL set in config.');
+    incompleteConfig = true;
+  }
+  return incompleteConfig;
+}
 
 function getAuthToken(url) {
   return fetch(url)
@@ -31,6 +56,29 @@ async function loadPicker() {
   return new Promise(resolve => {
     window.gapi.load('picker', () => {
       resolve();
+    });
+  });
+}
+
+async function loadAuth() {
+  return new Promise(resolve => {
+    window.gapi.load('auth', () => {
+      resolve();
+    });
+  });
+}
+
+async function handleAuth(client_id, scope) {
+  return new Promise((resolve, reject) => {
+    window.gapi.auth.authorize({
+      'client_id': client_id,
+      'scope': scope,
+      'immediate': false
+    }, (res) => {
+      if (res.error) {
+        reject(res.error);
+      }
+      resolve(res);
     });
   });
 }
@@ -62,7 +110,6 @@ function createPicker(google, config, token, handlePickerAction) {
     .setOrigin(config.origin)
     .setTitle(config.picker_title)
     .setCallback(handlePickerAction)
-    .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
     .enableFeature(google.picker.Feature.SUPPORT_DRIVES)
     .addView(browseView)
     .addView(uploadView)
@@ -72,30 +119,53 @@ function createPicker(google, config, token, handlePickerAction) {
 async function init({ options = {}, handleInsert } = {}) {
   const config = { ...defaultConfig, ...options.config };
 
-  await loadScript(scriptSrc);
+  if (!isValidConfig(config)) {
+    throw new Error('[Error] Google Drive Media Library: Could not initiate because config data is incomplete.');
+  };
+
+  await loadScript(gapiScript);
   await loadPicker();
+
   let authToken;
   if (config.auth_url) {
     let authRes = await getAuthToken(config.auth_url);
     authToken = authRes.token;
   } else {
-    throw new Error('No auth URL provided');
+    await loadAuth();
+    let authRes = await handleAuth(config.client_id, config.scope);
+    authToken = authRes.access_token;
   }
 
   let picker = {};
   const handlePickerAction = res => {
-    console.log(options.routing.getCurrentRoute());
-    console.log(options.routing.getCurrentEntry());
-    if (res.viewToken[0] === 'upload') {
-      let file = processFile(config.apps_script_url, {
-        id: res.docs[0].id,
-        name: res.docs[0].name
-      });
-      return handleInsert(file.description);
+    let file = res.docs ? res.docs[0] : null;
+    if (res.viewToken && res.viewToken[0] === 'upload') {
+      console.log('Uploading file');
+      let newFile = {
+        ...file,
+        proxyUrl: null,
+        relPath: null,
+      };
+      if (options.proxy_url) {
+        newFile.proxyUrl = options.proxy_url;
+      }
+      if (config.enable_nested_folders) {
+        newFile.relPath = options.pathConstructor.getCollectionFolder();
+      }
+      processFile(config.post_upload_url, newFile)
+        .then(res => {
+          console.log('Processed file');
+          if (options.proxy_url) {
+            return handleInsert(res.data.description);
+          }
+          return handleInsert(res.data.embeddable_url);
+        });
     }
     if (res.action === window.google.picker.Action.PICKED) {
-      // TODO Add metadata in GAS function of full rel path for file
-      return handleInsert(res.docs[0].description);
+      if (options.proxy_url) {
+        return handleInsert(file.description);
+      }
+      return handleInsert(file.embeddable_url);
     }
   }
 
