@@ -130,6 +130,9 @@ async function init({ options = {}, handleInsert } = {}) {
   if (config.auth_url) {
     let authRes = await getAuthToken(config.auth_url);
     authToken = authRes.token;
+    config.api_key = authRes.config.api_key;
+    config.app_id = authRes.config.app_id;
+    config.post_upload_url = authRes.config.post_upload_url;
   } else {
     await loadAuth();
     let authRes = await handleAuth(config.client_id, config.scope);
