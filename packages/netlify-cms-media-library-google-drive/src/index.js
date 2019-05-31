@@ -5,33 +5,33 @@ const gapiScript = 'https://apis.google.com/js/api.js?onload=onApiLoad';
 const defaultConfig = {
   browse_view: true,
   upload_view: true,
-  scope: 'https://www.googleapis.com/auth/drive',
+  scope: 'https://www.googleapis.com/auth/drive.file',
   picker_title: 'Media'
 };
 
 function isValidConfig(config) {
-  let incompleteConfig = false;
+  let isValidConfig = true;
   if (!config.api_key) {
     console.error('[Error] Google Drive Media Library: No API key set in config.');
-    incompleteConfig = true;
+    isValidConfig = false;
   }
   if (!config.app_id) {
     console.error('[Error] Google Drive Media Library: No app id set in config.');
-    incompleteConfig = true;
+    isValidConfig = false;
   }
   if (!config.origin) {
     console.error('[Error] Google Drive Media Library: No origin URL set in config.');
-    incompleteConfig = true;
+    isValidConfig = false;
   }
   if (!config.auth_url && !config.client_id) {
     console.error('[Error] Google Drive Media Library: You must set either a client ID or an auth URL in config.');
-    incompleteConfig = true;
+    isValidConfig = false;
   }
   if (!config.post_upload_url) {
     console.error('[Error] Google Drive Media Library: No post-upload Apps Script URL set in config.');
-    incompleteConfig = true;
+    isValidConfig = false;
   }
-  return incompleteConfig;
+  return isValidConfig;
 }
 
 function getAuthToken(url) {
@@ -88,9 +88,17 @@ async function processFile(url, data) {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'text/plain'
     }
-  });
+  })
+    .then(res => {
+      if (!res.ok) {
+        return {
+          error: 'There was a problem with the response from processing the file.'
+        };
+      }
+      return res.json();
+    });
 }
 
 function createPicker(google, config, token, handlePickerAction) {
@@ -119,9 +127,9 @@ function createPicker(google, config, token, handlePickerAction) {
 async function init({ options = {}, handleInsert } = {}) {
   const config = { ...defaultConfig, ...options.config };
 
-  if (!isValidConfig(config)) {
+  if (!isValidConfig(config) && !config.load_keys_with_auth) {
     throw new Error('[Error] Google Drive Media Library: Could not initiate because config data is incomplete.');
-  };
+  }
 
   await loadScript(gapiScript);
   await loadPicker();
@@ -159,6 +167,10 @@ async function init({ options = {}, handleInsert } = {}) {
             return handleInsert(res.data.description);
           }
           return handleInsert(res.data.embeddable_url);
+        })
+        .catch(error => {
+          console.error(error);
+          return;
         });
     }
     if (res.action === window.google.picker.Action.PICKED) {
