@@ -2,12 +2,31 @@ import APIError from './APIError';
 import Cursor, { CURSOR_COMPATIBILITY_SYMBOL } from './Cursor';
 import EditorialWorkflowError, { EDITORIAL_WORKFLOW_ERROR } from './EditorialWorkflowError';
 import localForage from './localForage';
-import { resolvePath, basename, fileExtensionWithSeparator, fileExtension } from './path';
-import { filterPromises, resolvePromiseProperties, then } from './promise';
+import {
+  resolvePath,
+  resolveMediaFilename,
+  basename,
+  fileExtensionWithSeparator,
+  fileExtension,
+} from './path';
+import {
+  filterPromises,
+  filterPromisesWith,
+  onlySuccessfulPromises,
+  resolvePromiseProperties,
+  then,
+} from './promise';
 import unsentRequest from './unsentRequest';
-import { filterByPropExtension, parseResponse, responseParser } from './backendUtil';
+import {
+  filterByPropExtension,
+  getAllResponses,
+  parseLinkHeader,
+  parseResponse,
+  responseParser,
+} from './backendUtil';
 import loadScript from './loadScript';
 import getBlobSHA from './getBlobSHA';
+import { asyncLock } from './asyncLock';
 
 export const NetlifyCmsLibUtil = {
   APIError,
@@ -17,14 +36,18 @@ export const NetlifyCmsLibUtil = {
   EDITORIAL_WORKFLOW_ERROR,
   localForage,
   resolvePath,
+  resolveMediaFilename,
   basename,
   fileExtensionWithSeparator,
   fileExtension,
   filterPromises,
+  filterPromisesWith,
+  onlySuccessfulPromises,
   resolvePromiseProperties,
   then,
   unsentRequest,
   filterByPropExtension,
+  parseLinkHeader,
   parseResponse,
   responseParser,
   loadScript,
@@ -38,16 +61,22 @@ export {
   EDITORIAL_WORKFLOW_ERROR,
   localForage,
   resolvePath,
+  resolveMediaFilename,
   basename,
   fileExtensionWithSeparator,
   fileExtension,
   filterPromises,
+  filterPromisesWith,
+  onlySuccessfulPromises,
   resolvePromiseProperties,
   then,
   unsentRequest,
   filterByPropExtension,
+  parseLinkHeader,
+  getAllResponses,
   parseResponse,
   responseParser,
   loadScript,
   getBlobSHA,
+  asyncLock,
 };

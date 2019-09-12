@@ -218,6 +218,7 @@ class EditorToolbar extends React.Component {
     displayUrl: PropTypes.string,
     collection: ImmutablePropTypes.map.isRequired,
     hasWorkflow: PropTypes.bool,
+    useOpenAuthoring: PropTypes.bool,
     hasUnpublishedChanges: PropTypes.bool,
     isNewEntry: PropTypes.bool,
     isModification: PropTypes.bool,
@@ -379,6 +380,7 @@ class EditorToolbar extends React.Component {
       onPublishAndNew,
       currentStatus,
       isNewEntry,
+      useOpenAuthoring,
       t,
     } = this.props;
     if (currentStatus) {
@@ -399,44 +401,52 @@ class EditorToolbar extends React.Component {
             <StatusDropdownItem
               label={t('editor.editorToolbar.draft')}
               onClick={() => onChangeStatus('DRAFT')}
-              icon={currentStatus === status.get('DRAFT') && 'check'}
+              icon={currentStatus === status.get('DRAFT') ? 'check' : null}
             />
             <StatusDropdownItem
               label={t('editor.editorToolbar.inReview')}
               onClick={() => onChangeStatus('PENDING_REVIEW')}
-              icon={currentStatus === status.get('PENDING_REVIEW') && 'check'}
+              icon={currentStatus === status.get('PENDING_REVIEW') ? 'check' : null}
             />
-            <StatusDropdownItem
-              label={t('editor.editorToolbar.ready')}
-              onClick={() => onChangeStatus('PENDING_PUBLISH')}
-              icon={currentStatus === status.get('PENDING_PUBLISH') && 'check'}
-            />
-          </ToolbarDropdown>
-          <ToolbarDropdown
-            dropdownTopOverlap="40px"
-            dropdownWidth="150px"
-            renderButton={() => (
-              <PublishButton>
-                {isPublishing
-                  ? t('editor.editorToolbar.publishing')
-                  : t('editor.editorToolbar.publish')}
-              </PublishButton>
-            )}
-          >
-            <DropdownItem
-              label={t('editor.editorToolbar.publishNow')}
-              icon="arrow"
-              iconDirection="right"
-              onClick={onPublish}
-            />
-            {collection.get('create') ? (
-              <DropdownItem
-                label={t('editor.editorToolbar.publishAndCreateNew')}
-                icon="add"
-                onClick={onPublishAndNew}
+            {useOpenAuthoring ? (
+              ''
+            ) : (
+              <StatusDropdownItem
+                label={t('editor.editorToolbar.ready')}
+                onClick={() => onChangeStatus('PENDING_PUBLISH')}
+                icon={currentStatus === status.get('PENDING_PUBLISH') ? 'check' : null}
               />
-            ) : null}
+            )}
           </ToolbarDropdown>
+          {useOpenAuthoring ? (
+            ''
+          ) : (
+            <ToolbarDropdown
+              dropdownTopOverlap="40px"
+              dropdownWidth="150px"
+              renderButton={() => (
+                <PublishButton>
+                  {isPublishing
+                    ? t('editor.editorToolbar.publishing')
+                    : t('editor.editorToolbar.publish')}
+                </PublishButton>
+              )}
+            >
+              <DropdownItem
+                label={t('editor.editorToolbar.publishNow')}
+                icon="arrow"
+                iconDirection="right"
+                onClick={onPublish}
+              />
+              {collection.get('create') ? (
+                <DropdownItem
+                  label={t('editor.editorToolbar.publishAndCreateNew')}
+                  icon="add"
+                  onClick={onPublishAndNew}
+                />
+              ) : null}
+            </ToolbarDropdown>
+          )}
         </>
       );
     }

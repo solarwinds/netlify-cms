@@ -13,6 +13,7 @@ import EditorToggle from './EditorToggle';
 
 const PREVIEW_VISIBLE = 'cms.preview-visible';
 const SCROLL_SYNC_ENABLED = 'cms.scroll-sync-enabled';
+const SPLIT_PANE_POSITION = 'cms.split-pane-position';
 
 const styles = {
   splitPane: css`
@@ -37,7 +38,7 @@ const ReactSplitPaneGlobalStyles = () => (
 
         &:before {
           content: '';
-          width: 1px;
+          width: 2px;
           height: 100%;
           position: relative;
           left: 10px;
@@ -82,7 +83,6 @@ const EditorContainer = styled.div`
 `;
 
 const Editor = styled.div`
-  max-width: 1600px;
   height: 100%;
   margin: 0 auto;
   position: relative;
@@ -165,6 +165,7 @@ class EditorInterface extends Component {
       hasChanged,
       displayUrl,
       hasWorkflow,
+      useOpenAuthoring,
       hasUnpublishedChanges,
       isNewEntry,
       isModification,
@@ -199,7 +200,8 @@ class EditorInterface extends Component {
           <ReactSplitPaneGlobalStyles />
           <StyledSplitPane
             maxSize={-100}
-            defaultSize="50%"
+            defaultSize={parseInt(localStorage.getItem(SPLIT_PANE_POSITION), 10) || '50%'}
+            onChange={size => localStorage.setItem(SPLIT_PANE_POSITION, size)}
             onDragStarted={this.handleSplitPaneDragStart}
             onDragFinished={this.handleSplitPaneDragFinished}
           >
@@ -238,6 +240,7 @@ class EditorInterface extends Component {
           displayUrl={displayUrl}
           collection={collection}
           hasWorkflow={hasWorkflow}
+          useOpenAuthoring={useOpenAuthoring}
           hasUnpublishedChanges={hasUnpublishedChanges}
           isNewEntry={isNewEntry}
           isModification={isModification}
@@ -253,12 +256,14 @@ class EditorInterface extends Component {
               active={previewVisible}
               onClick={this.handleTogglePreview}
               icon="eye"
+              title="Toggle preview"
             />
             <EditorToggle
               enabled={collectionPreviewEnabled && previewVisible}
               active={scrollSyncEnabled}
               onClick={this.handleToggleScrollSync}
               icon="scroll"
+              title="Sync scrolling"
             />
           </ViewControls>
           {collectionPreviewEnabled && this.state.previewVisible ? (
@@ -291,6 +296,7 @@ EditorInterface.propTypes = {
   hasChanged: PropTypes.bool,
   displayUrl: PropTypes.string,
   hasWorkflow: PropTypes.bool,
+  useOpenAuthoring: PropTypes.bool,
   hasUnpublishedChanges: PropTypes.bool,
   isNewEntry: PropTypes.bool,
   isModification: PropTypes.bool,
