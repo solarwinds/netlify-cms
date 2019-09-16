@@ -175,6 +175,15 @@ class Header extends React.Component {
                   </AppHeaderButton>
                 </li>
               )*/}
+              <li>
+                <AppHeaderNavLink
+                  to="/trainings"
+                  activeClassName="header-link-active"
+                  isActive={(match, location) => location.pathname.startsWith('/trainings/')}
+                >
+                  <Icon type="page" /> Trainings
+                </AppHeaderNavLink>
+              </li>
             </AppHeaderNavList>
           </nav>
           <AppHeaderActions>

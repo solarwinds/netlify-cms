@@ -23,6 +23,7 @@ import Workflow from 'Workflow/Workflow';
 import Editor from 'Editor/Editor';
 import NotFoundPage from './NotFoundPage';
 import Header from './Header';
+import Trainings from 'Trainings';
 
 TopBarProgress.config({
   barColors: {
@@ -177,6 +178,8 @@ class App extends React.Component {
             <Redirect exact from="/" to={defaultPath} />
             <Redirect exact from="/search/" to={defaultPath} />
             {hasWorkflow ? <Route path="/workflow" component={Workflow} /> : null}
+            {// TODO import Training and add route
+            }
             <Route
               exact
               path="/collections/:name"
@@ -200,6 +203,11 @@ class App extends React.Component {
                 const { collectionName, entryName } = match.params;
                 return <Redirect to={`/collections/${collectionName}/entries/${entryName}`} />;
               }}
+            />
+            <Route
+              exact
+              path="/trainings"
+              component={Trainings}
             />
             <Route component={NotFoundPage} />
           </Switch>
